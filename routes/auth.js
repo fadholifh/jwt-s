@@ -29,16 +29,18 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.get("/registers", (req, res) => {
-  res.send("ajsdosjd");
-  console.log("asjhdus");
-});
-
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   //Validate The Data Before
   const { error } = loginValidation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-    
+    //check email exist
+    const user = await User.findOne({email:req.body.email});
+    if(!user)  return res.status(400).send('Email not found');
+    //password correct
+    const validPass = await bcrypt.compare(req.body.password, user.password)
+    if (!validPass) return res.status(400).send('Invalid password');
+
+    res.send('Loged in');
 });
 
 module.exports = router;
